@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieReservationsSystem", "MovieReservationsSystem\MovieReservationsSystem.csproj", "{70C2002F-61A9-4C45-B88C-00D5A0CE5886}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{70C2002F-61A9-4C45-B88C-00D5A0CE5886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70C2002F-61A9-4C45-B88C-00D5A0CE5886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70C2002F-61A9-4C45-B88C-00D5A0CE5886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70C2002F-61A9-4C45-B88C-00D5A0CE5886}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
