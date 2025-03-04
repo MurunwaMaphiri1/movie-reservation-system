@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using Stripe;
 using StackExchange.Redis;
 using System.Text;
+using NgrokAspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,20 +20,6 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 DotNetEnv.Env.Load();
-
-// builder.Services.AddDistributedMemoryCache();
-// builder.Services.AddSession(options =>
-// {
-//     options.IdleTimeout = TimeSpan.FromMinutes(15);
-//     options.Cookie.Name = "MovieCart";
-//     options.Cookie.IsEssential = true;
-// });
-
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = "localhost:6379";
-    options.InstanceName = "MovieReservations_";
-});
 
 var jwtKey = Env.GetString("JWT_SECRET_KEY");
 StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
@@ -87,7 +75,6 @@ var app = builder.Build();
 
 //Enable CORS
 app.UseCors("AllowFrontend");
-app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

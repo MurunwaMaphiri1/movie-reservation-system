@@ -7,5 +7,4 @@ public class MovieReservationDTO
     public DateTime ReservationDate { get; set; }
     public int TimeSlotId { get; set; }
     public string[] SeatNumbers { get; set; }
-    public decimal TotalPrice { get; set; }
 }

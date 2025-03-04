@@ -36,15 +36,6 @@ namespace MovieReservationsSystem.Controllers
             var movie = await _context.Movies.FindAsync(id);
             return Ok(movie);
         }
-        
-        //Get movie by name
-        // [HttpGet("get-movie/movie-title/{title}")]
-        // public async Task<IActionResult> GetMovieByTitle(string title)
-        // {
-        //     var movie = _context.Movies.FirstOrDefault(x => x.Title == title);
-        //     if (movie == null) return NotFound();
-        //     return Ok(movie);
-        // }
 
         [HttpGet("get-movie/movie-title/{title}")]
         public async Task<ActionResult> GetMovieByTitle(string title)
