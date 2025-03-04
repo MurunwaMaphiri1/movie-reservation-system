@@ -21,7 +21,7 @@ namespace MovieReservationsSystem.Controllers
     public class MovieReservationsController: ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<MovieReservationsController> _logger;
         
 
 
@@ -41,47 +41,6 @@ namespace MovieReservationsSystem.Controllers
             var allMovieRes = _context.MovieReservations.ToList();
             return Ok(allMovieRes);
         }
-        
-        // //Create reservation
-        // [HttpPost("/create-reservation")]
-        // public async Task<IActionResult> CreateReservation([FromBody] MovieReservations reservation)
-        // {
-        //     
-        //     //Check if seats are taken if a user books within the same timeslot as someone else
-        //     var existingReservation = _context.MovieReservations
-        //         .Where(r => r.MovieId == reservation.MovieId && r.ReservationDate == reservation.ReservationDate && r.TimeSlotId == reservation.TimeSlotId)
-        //         .SelectMany(r => r.SeatNumbers)
-        //         .ToList();
-        //
-        //     var conflictingSeats = reservation.SeatNumbers.Intersect(existingReservation).ToList();
-        //
-        //     if (conflictingSeats.Any())
-        //     {
-        //         return BadRequest(new
-        //         {
-        //             _logger = "Some seats are already booked",
-        //             ConflictingSeats = conflictingSeats
-        //         });
-        //     }
-        //
-        //     var newReservation = new MovieReservations
-        //     {
-        //         UserId = reservation.UserId,
-        //         MovieId = reservation.MovieId,
-        //         ReservationDate = reservation.ReservationDate,
-        //         TimeSlotId = reservation.TimeSlotId,
-        //         SeatNumbers = reservation.SeatNumbers
-        //     };
-        //     
-        //     _context.MovieReservations.Add(newReservation);
-        //     await _context.SaveChangesAsync();
-        //     return Ok( new
-        //     {
-        //         _logger = "Reservation created",
-        //         newReservation,
-        //         TotalPrice = newReservation.GetTotalPrice()
-        //     });
-        // }
 
         [HttpPost("create-checkout")]
         public async Task<IActionResult> CreateCheckout([FromBody] MovieReservationDTO movieReservation)
@@ -110,21 +69,11 @@ namespace MovieReservationsSystem.Controllers
                 // Get the movie to calculate price
                 var movie = await _context.Movies.FindAsync(movieReservation.MovieId);
                 if (movie == null) return NotFound("Movie not found");
-
                 
-                var reservationData = new MovieReservationDTO()
-                {
-                    UserId = movieReservation.UserId,
-                    MovieId = movieReservation.MovieId,
-                    ReservationDate = movieReservation.ReservationDate,
-                    TimeSlotId = movieReservation.TimeSlotId,
-                    SeatNumbers = movieReservation.SeatNumbers,
-                    // TotalPrice = movieReservation.SeatNumbers.Length * movie.TicketPrice
-                };
-                
-
                 // Create Stripe checkout session
                 StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
+                
+                var reservationJson = JsonConvert.SerializeObject(movieReservation);
 
                 var options = new SessionCreateOptions
                 {
@@ -149,8 +98,12 @@ namespace MovieReservationsSystem.Controllers
                         }
                     },
                     Mode = "payment",
-                    SuccessUrl = $"{Request.Scheme}://{Request.Host}/confirm-reservation",
-                    CancelUrl = $"{Request.Scheme}://{Request.Host}/cancelled-reservation"
+                    SuccessUrl = $"http://localhost:5173/confirm-reservation",
+                    CancelUrl = $"http://localhost:5173/cancelled-reservation",
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "reservation_data", reservationJson }
+                    }
                 };
 
                 var service = new SessionService();
@@ -158,7 +111,7 @@ namespace MovieReservationsSystem.Controllers
                 
                 
 
-                return Ok(new { reservationData, sessionId = session.Id });
+                return Ok(new { sessionId = session.Id });
             }
             catch (Exception ex)
             {
@@ -166,52 +119,6 @@ namespace MovieReservationsSystem.Controllers
                 return StatusCode(500, $"Error creating checkout session: {ex.Message}");
             }
         }
-
-        // [HttpGet("confirm-reservation")]
-        // public async Task<IActionResult> ConfirmReservation(string id)
-        // {
-        //     try
-        //     {
-        //         // Get reservation data from Redis
-        //         string reservationJson = await _distributedCache.GetStringAsync($"reservation:{id}");
-        //         
-        //         if (string.IsNullOrEmpty(reservationJson))
-        //         {
-        //             return NotFound("Reservation data not found or expired");
-        //         }
-        //
-        //         var tempReservation = JsonSerializer.Deserialize<MovieReservationDTO>(reservationJson);
-        //
-        //         // Create the actual reservation
-        //         var newReservation = new MovieReservations
-        //         {
-        //             UserId = tempReservation.UserId,
-        //             MovieId = tempReservation.MovieId,
-        //             ReservationDate = tempReservation.ReservationDate,
-        //             TimeSlotId = tempReservation.TimeSlotId,
-        //             SeatNumbers = tempReservation.SeatNumbers
-        //         };
-        //
-        //         _context.MovieReservations.Add(newReservation);
-        //         await _context.SaveChangesAsync();
-        //
-        //         // Remove the temp reservation from Redis
-        //         await _distributedCache.RemoveAsync($"reservation:{id}");
-        //
-        //         // Return a view or redirect to a confirmation page
-        //         return Ok(new 
-        //         { 
-        //             message = "Reservation confirmed", 
-        //             reservationId = newReservation.Id,
-        //             totalPaid = tempReservation.TotalPrice
-        //         });
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Error confirming reservation");
-        //         return StatusCode(500, $"Error confirming reservation: {ex.Message}");
-        //     }
-        // }
         
         //Get movie reservations by UserId
         [HttpGet("search")] 
