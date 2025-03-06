@@ -41,6 +41,21 @@ namespace MovieReservationsSystem.Controllers
             var allMovieRes = _context.MovieReservations.ToList();
             return Ok(allMovieRes);
         }
+        
+        //Get taken seats
+        [HttpGet("taken-seats/{movieId}/{date}/{timeSlotId}")]
+        public async Task<IActionResult> GetTakenSeats([FromRoute] DateTime date, [FromRoute] int timeSlotId, 
+            [FromRoute] int movieId)
+        {
+            var reservedSeats = _context.MovieReservations
+                .Where(r => r.ReservationDate == date && r.TimeSlotId == timeSlotId 
+                                                      && r.MovieId == movieId)
+                .SelectMany(r => r.SeatNumbers)
+                .ToList();
+            
+            return Ok(reservedSeats);
+                
+        }
 
         [HttpPost("create-checkout")]
         public async Task<IActionResult> CreateCheckout([FromBody] MovieReservationDTO movieReservation)
