@@ -1,13 +1,13 @@
 # Movie Reservation System
 
 ## 📌 Overview
-The **Movie Reservation System** is a **.NET Core Web API** that allows users to browse movies, select showtimes, and book reservations securely. The API is designed with **JWT authentication**, **Entity Framework Core**, and **PostgreSQL** for data storage.
+The **Movie Reservation System** is a **.NET Core Web API** that allows users to browse movies, select showtimes and book reservations securely. The API is designed with **JWT authentication**, **Entity Framework Core** and **PostgreSQL** for data storage.
 
 ## 🛠 Tech Stack
 - **Backend:** C#/ASP.NET Core
 - **Database:** PostgreSQL
 - **Authentication:** JWT
-- **Frontend (Optional):** React.js
+- **Frontend:** React.js
 
 ## 🚀 Features
 - **User Authentication**: Secure login and registration using JWT.
@@ -274,5 +274,5 @@ The API should now be running at `http://localhost:7035`.
 
 ## 📌 Future Improvements
 - Add **Admin Role** for managing movies and reservations.
-
+- Add **Email** service confirming reservation when user creates a reservation
 ---
