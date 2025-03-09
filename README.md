@@ -274,5 +274,6 @@ The API should now be running at `http://localhost:7035`.
 
 ## 📌 Future Improvements
 - Add **Admin Role** for managing movies and reservations.
-- Add **Email** service confirming reservation when user creates a reservation
+- Add **Email** service confirming reservation when user creates a reservation.
+- Implement Redis
 ---
