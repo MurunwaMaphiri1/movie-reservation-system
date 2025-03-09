@@ -28,7 +28,7 @@ cd movie-reservation-system
 
 ### **2. Configure the Database**
 - Install **PostgreSQL** and create a database.
-- Update the `appsettings.json` file with your database connection string:
+- Update the `.env` file with your database, JWT and Stripe configuration settings:
 ```json
 #PostgreSQL configuration
 DATABASE_HOST=localhost
