@@ -142,10 +142,8 @@ namespace MovieReservationsSystem.Controllers
             var reservations = await _context.MovieReservations
                 .Where(r => r.UserId == userId)
                 .Include(r => r.User) 
-                .Include(r => r.Movie) 
-                .Include(r => r.ReservationDate)
+                .Include(r => r.Movie)
                 .Include(r => r.TimeSlot)
-                .Include(r => r.SeatNumbers.Length)
                 .ToListAsync();
 
             if (reservations == null || reservations.Count == 0)
