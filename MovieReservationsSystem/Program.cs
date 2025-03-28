@@ -24,15 +24,17 @@ DotNetEnv.Env.Load();
 var jwtKey = Env.GetString("JWT_SECRET_KEY");
 StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
 
-var connectionString = $"Host={Env.GetString("DATABASE_HOST")};" +
-                       $"Port={Env.GetInt("DATABASE_PORT")};" +
-                       $"Database={Env.GetString("DATABASE_NAME")};" +
-                       $"Username={Env.GetString("DATABASE_USERNAME")};" +
-                       $"Password={Env.GetString("DATABASE_PASSWORD")};";
+// var connectionString = $"Host={Env.GetString("DATABASE_HOST")};" +
+//                        $"Port={Env.GetInt("DATABASE_PORT")};" +
+//                        $"Database={Env.GetString("DATABASE_NAME")};" +
+//                        $"Username={Env.GetString("DATABASE_USERNAME")};" +
+//                        $"Password={Env.GetString("DATABASE_PASSWORD")};";
+
+var connectionString = Env.GetString("sqlServer");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(connectionString);
+    options.UseSqlServer(connectionString);
 });
 
 builder.Services.AddAuthentication(options =>

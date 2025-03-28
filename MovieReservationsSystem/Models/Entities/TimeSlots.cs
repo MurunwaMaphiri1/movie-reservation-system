@@ -9,5 +9,5 @@ public class TimeSlots
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int TimeSlotId { get; set; }
     
-    public TimeSpan TimeSlot { get; set; }
+    public TimeOnly TimeSlot { get; set; }
 }

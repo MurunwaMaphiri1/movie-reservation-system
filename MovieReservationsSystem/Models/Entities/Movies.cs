@@ -16,7 +16,7 @@ public class Movies
     public string Description { get; set; }
     
     [Required]
-    public string[] Genres { get; set; } = Array.Empty<string>();
+    public string Genres { get; set; } = "[]";
     
     [Required]
     public string Image { get; set; }
