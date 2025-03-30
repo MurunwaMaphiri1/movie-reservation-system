@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MovieReservationsSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,7 @@ namespace MovieReservationsSystem.Migrations
                     Description = table.Column<string>(type: "text", nullable: false),
                     Genres = table.Column<string[]>(type: "text[]", nullable: false),
                     Image = table.Column<string>(type: "text", nullable: false),
-                    ReleaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ReleaseDate = table.Column<DateOnly>(type: "date", nullable: false),
                     Duration = table.Column<string>(type: "text", nullable: false),
                     DirectedBy = table.Column<string>(type: "text", nullable: false),
                     Actors = table.Column<string[]>(type: "text[]", nullable: false),
@@ -40,7 +40,7 @@ namespace MovieReservationsSystem.Migrations
                 {
                     TimeSlotId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TimeSlot = table.Column<TimeSpan>(type: "interval", nullable: false)
+                    TimeSlot = table.Column<TimeOnly>(type: "time", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,7 +71,7 @@ namespace MovieReservationsSystem.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     MovieId = table.Column<int>(type: "integer", nullable: false),
-                    ReservationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ReservationDate = table.Column<DateOnly>(type: "date", nullable: false),
                     TimeSlotId = table.Column<int>(type: "integer", nullable: false),
                     SeatNumbers = table.Column<string[]>(type: "text[]", nullable: false)
                 },

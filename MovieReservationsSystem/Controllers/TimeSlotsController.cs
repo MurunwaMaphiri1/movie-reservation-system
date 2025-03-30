@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MovieReservationsSystem.Data;
 using MovieReservationsSystem.Models.Entities;
 
@@ -36,9 +37,19 @@ namespace MovieReservationsSystem.Controllers
         [HttpGet("get-timeSlotId-by-time-string")]
         public async Task<ActionResult> GetTimeSlotIdByTimeString([FromQuery] string timeString)
         {
-            var time = _context.TimeSlots.FirstOrDefault(t => t.TimeSlot.ToString() == timeString);
-            
-            return Ok(time.TimeSlotId);
+            if (!TimeOnly.TryParse(timeString, out var parsedTime))
+            {
+                return BadRequest("Invalid time format. Use HH:mm:ss");
+            }
+
+            var timeSlot = await _context.TimeSlots.FirstOrDefaultAsync(t => t.TimeSlot == parsedTime);
+
+            if (timeSlot == null)
+            {
+                return NotFound("Time slot not found.");
+            }
+
+            return Ok(timeSlot.TimeSlotId);
         }
         
         //Delete Timeslot

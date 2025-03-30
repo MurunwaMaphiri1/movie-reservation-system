@@ -44,7 +44,7 @@ namespace MovieReservationsSystem.Controllers
         
         //Get taken seats
         [HttpGet("taken-seats/{movieId}/{date}/{timeSlotId}")]
-        public async Task<IActionResult> GetTakenSeats([FromRoute] DateTime date, [FromRoute] int timeSlotId, 
+        public async Task<IActionResult> GetTakenSeats([FromRoute] DateOnly date, [FromRoute] int timeSlotId, 
             [FromRoute] int movieId)
         {
             var reservedSeats = _context.MovieReservations
@@ -65,7 +65,7 @@ namespace MovieReservationsSystem.Controllers
                 // Check for seat conflicts
                 var existingReservation = _context.MovieReservations
                     .Where(r => r.MovieId == movieReservation.MovieId &&
-                                r.ReservationDate.Date == movieReservation.ReservationDate.Date &&
+                                r.ReservationDate == movieReservation.ReservationDate &&
                                 r.TimeSlotId == movieReservation.TimeSlotId)
                     .SelectMany(r => r.SeatNumbers)
                     .ToList();
@@ -143,9 +143,9 @@ namespace MovieReservationsSystem.Controllers
                 .Where(r => r.UserId == userId)
                 .Include(r => r.User) 
                 .Include(r => r.Movie) 
-                .Include(r => r.ReservationDate)
+                // .Include(r => r.ReservationDate)
                 .Include(r => r.TimeSlot)
-                .Include(r => r.SeatNumbers.Length)
+                // .Include(r => r.SeatNumbers.Length)
                 .ToListAsync();
 
             if (reservations == null || reservations.Count == 0)

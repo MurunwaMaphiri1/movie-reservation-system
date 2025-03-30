@@ -18,7 +18,7 @@ public class MovieReservations
     public Movies Movie { get; set; }
     
     [Required]
-    public DateTime ReservationDate { get; set; }
+    public DateOnly ReservationDate { get; set; }
     
     [Required]
     public int TimeSlotId { get; set; }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MovieReservationsSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250306001815_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250330124157_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,8 +36,8 @@ namespace MovieReservationsSystem.Migrations
                     b.Property<int>("MovieId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("ReservationDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("ReservationDate")
+                        .HasColumnType("date");
 
                     b.PrimitiveCollection<string[]>("SeatNumbers")
                         .IsRequired()
@@ -92,8 +92,8 @@ namespace MovieReservationsSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("ReleaseDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("ReleaseDate")
+                        .HasColumnType("date");
 
                     b.Property<long>("TicketPrice")
                         .HasColumnType("bigint");
@@ -119,8 +119,8 @@ namespace MovieReservationsSystem.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TimeSlotId"));
 
-                    b.Property<TimeSpan>("TimeSlot")
-                        .HasColumnType("interval");
+                    b.Property<TimeOnly>("TimeSlot")
+                        .HasColumnType("time");
 
                     b.HasKey("TimeSlotId");
 
