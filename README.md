@@ -31,17 +31,17 @@ cd movie-reservation-system
 - Update the `.env` file with your database, JWT and Stripe configuration settings:
 ```json
 #PostgreSQL configuration
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
+DATABASE_HOST=
+DATABASE_PORT=
 DATABASE_NAME=
-DATABASE_USERNAME=postgres
+DATABASE_USERNAME=
 DATABASE_PASSWORD=
 
 #Configuration settings
 JWT_SECRET_KEY=
 
-DATABASE_ISSUER=https://localhost:7035
-DATABASE_AUDIENCE=http://localhost:5173
+DATABASE_ISSUER=
+DATABASE_AUDIENCE=
 
 STRIPE_SECRET_KEY=
 
