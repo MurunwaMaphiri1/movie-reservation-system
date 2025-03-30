@@ -272,6 +272,15 @@ The API should now be running at `http://localhost:7035`.
 
 ---
 
+## UI
+![image](https://github.com/user-attachments/assets/cccac28d-b520-4cbf-9df1-28dfbbe7172e)
+![image](https://github.com/user-attachments/assets/13727d8d-06c5-4d0e-80e8-8bfd25ec3c11)
+![image](https://github.com/user-attachments/assets/9ca2c76c-fece-45bf-9829-43628608df18)
+![image](https://github.com/user-attachments/assets/1f221226-3fcb-4a54-b723-7e1508fb80ea)
+![image](https://github.com/user-attachments/assets/801472b7-3e98-4a65-9135-e4271082ab02)
+![image](https://github.com/user-attachments/assets/261f8b69-48b9-4bdb-be5b-b93f9e733dc5)
+![image](https://github.com/user-attachments/assets/da69a841-8969-4b25-a5f0-d13e4cd71577)
+
 ## 📌 Future Improvements
 - Add **Admin Role** for managing movies and reservations.
 - Add **Email** service confirming reservation when user creates a reservation.
