@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+         body {
+            background-color: #080c14;
+            color: white;
+            font-family: "Trebuchet MS";
+        } 
+        
+         .container {
+            display: flex;
+            width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #101828;
+            color: white;
+             flex-direction: column;
+        } 
+        
+         .header {
+            width: 100%;
+            background-color: #101828;
+            color: white;
+            padding: 5%;
+        }
+        
+        .logo {
+            width: 50%;
+            display: flex;
+            flex-direction: row;
+        }
+        
+        .email-image img{
+            width: 100%;
+        }
+        
+        .heading {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .reservation-details {
+            margin-top: 30px;
+        }
+        
+        .email-body {
+            display: flex;
+            padding: 20px;
+        } 
+    </style>
+</head>
+<body style="background-color:#080c14;color:white;font-family:Trebuchet MS;margin: 0;padding: 0;box-sizing: border-box;">
+<div class="container" style="display:flex;width: 900px;margin-left: auto;margin-right: auto;background-color: #101828;color: white;flex-direction: column">
+    <div class="header" style="width: 100%;background-color: #101828;color: white;padding: 5%;">
+        <div class="logo" style="width: 50%;display: flex;flex-direction: row;">
+            <img style="height: 30px; width: 30px;"
+                 src="https://ik.imagekit.io/fa7vrszuse/movie.png?updatedAt=1744412390346"
+            >
+            <h2>
+                MagicBox Theatres
+            </h2>
+        </div>
+    </div>
+    <div class="email-image">
+        <img style="width: 100%;"
+             src="https://images.unsplash.com/photo-1617914309185-9e63b3badfca?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        >
+    </div>
+    <div class="reservation-details" style="margin-top: 30px;">
+        <div class="heading">
+            <h1 style="display: flex;justify-content: center;margin-bottom: 10px;">
+                It's Confirmed!
+            </h1>
+        </div>
+        <div class="email-body" style="display: flex;padding: 20px;">
+            <p>
+                Hello {{reservation.User.FullName}}, <br>
+                Thank you for booking at MagicBox Theatres. <br>
+                Your reservation for '{{reservation.Movie.Title}}' is confirmed! <br>
+                Date: {{reservation.ReservationDate}} <br>
+                Time: {{reservation.TimeSlot.TimeSlot}} <br>
+                Seats: {{reservation.SeatNumbers}} <br>
+                Total Price: {{reservation.GetTotalPrice():C}}<br>
+                Make sure you arrive 15-30 minutes before screening.
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
