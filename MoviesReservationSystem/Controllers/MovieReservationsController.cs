@@ -13,7 +13,7 @@ using System.Text.Json;
 using Stripe.Checkout;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace MovieReservationsSystem.Controllers
+namespace MoviesReservationSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
