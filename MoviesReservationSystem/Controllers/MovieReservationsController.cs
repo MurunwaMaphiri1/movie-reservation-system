@@ -156,7 +156,7 @@ namespace MoviesReservationSystem.Controllers
         }
         
         //Cancel Reservation
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> DeleteMovieReservation([FromQuery] int id)
         {
             var reservation = await _context.MovieReservations.FindAsync(id);
