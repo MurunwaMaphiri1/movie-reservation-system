@@ -123,6 +123,7 @@ namespace MoviesReservationSystem.Controllers
                     .Replace("{{reservation.ReservationDate}}", fullReservation.ReservationDate.ToString())
                     .Replace("{{reservation.TimeSlot.TimeSlot}}", fullReservation.TimeSlot.TimeSlot.ToString())
                     .Replace("{{reservation.SeatNumbers}}", string.Join(",", fullReservation.SeatNumbers))
+                    .Replace("{{reservation.ReservationID}}", reservation.Id.ToString())
                     .Replace("{{reservation.GetTotalPrice():C}}", fullReservation.GetTotalPrice().ToString("C"));
                 
                 await _emailService.SendEmailAsync(fullReservation.User.Email, 
