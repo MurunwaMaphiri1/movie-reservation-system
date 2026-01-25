@@ -28,9 +28,9 @@ namespace MovieReservationsSystem.Controllers
         [HttpPost("add-time-slot")]
         public async Task<IActionResult> AddTimeslots(TimeSlots timeSlots)
         {
-            var timeSlot = _context.TimeSlots.Add(timeSlots);
+            _context.TimeSlots.Add(timeSlots);
             await _context.SaveChangesAsync();
-            return Ok(timeSlot);
+            return Ok(timeSlots);
         }
         
         //Get timeslotId by time string

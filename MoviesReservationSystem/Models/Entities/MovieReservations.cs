@@ -15,6 +15,8 @@ public class MovieReservations
     
     [Required]
     public int MovieId { get; set; }
+    
+    public string? PaymentId { get; set; }
     public Movies Movie { get; set; }
     
     [Required]

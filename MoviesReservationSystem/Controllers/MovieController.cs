@@ -49,11 +49,11 @@ namespace MoviesReservationSystem.Controllers
         
         //Add movie
         [HttpPost("add-movie")]
-        public async Task<IActionResult> AddMovie([FromBody] Movies movie)
+        public async Task<IActionResult> AddMovie([FromBody] List<Movies> movie)
         {
-            var movieToAdd = await _context.Movies.AddAsync(movie);
+            await _context.Movies.AddRangeAsync(movie);
             await _context.SaveChangesAsync();
-            return Ok(movieToAdd);
+            return Ok(movie);
         }
         
         //Update Movie

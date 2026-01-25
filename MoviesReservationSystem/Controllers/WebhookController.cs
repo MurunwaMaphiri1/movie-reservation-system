@@ -11,6 +11,7 @@ using Stripe;
 using Stripe.Checkout;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using System.IO;
+using Stripe.Webhooks.Module;
 using ApplicationDbContext = MoviesReservationSystem.Data.ApplicationDbContext;
 
 namespace MoviesReservationSystem.Controllers
@@ -36,12 +37,12 @@ namespace MoviesReservationSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> HandleWebhook()
         {
-            var json = new StreamReader(Request.Body).ReadToEndAsync();
+            var json = await new StreamReader(Request.Body).ReadToEndAsync();
 
             try
             {
                 var stripeEvent = EventUtility.ConstructEvent(
-                     await json,
+                     json,
                     Request.Headers["Stripe-Signature"],
                     _webhookSecret
                 );
@@ -52,7 +53,7 @@ namespace MoviesReservationSystem.Controllers
 
                     if (session.Metadata.TryGetValue("reservation_data", out var reservationJson))
                     {
-                        await HandleCompletedCheckout(reservationJson);
+                        await HandleCompletedCheckout(reservationJson, session.PaymentIntentId);
                     }
                     else
                     {
@@ -70,7 +71,7 @@ namespace MoviesReservationSystem.Controllers
             }
         }
         
-        private async Task HandleCompletedCheckout(string reservationJson)
+        private async Task HandleCompletedCheckout(string reservationJson, string paymentId)
         {
             try
             {
@@ -87,7 +88,17 @@ namespace MoviesReservationSystem.Controllers
                     ReservationDate = reservationDetails.ReservationDate,
                     TimeSlotId = reservationDetails.TimeSlotId,
                     SeatNumbers = reservationDetails.SeatNumbers,
+                    PaymentId = paymentId
                 };
+                
+                var exists = await _context.MovieReservations
+                    .AnyAsync(r => r.PaymentId == reservation.PaymentId);
+
+                if (exists)
+                {
+                    _logger.LogInformation("Reservation already exists for payment {PaymentId}");
+                    return;
+                }
                 
                 _context.MovieReservations.Add(reservation);
                 await _context.SaveChangesAsync();
@@ -101,24 +112,18 @@ namespace MoviesReservationSystem.Controllers
                 if (fullReservation == null) 
                     throw new Exception($"Reservation with id {reservation.Id} not found.");
                 
-                // var emailContent = $@"
-                //     Dear {reservation.User.FullName},
-                //     Your reservation for '{reservation.Movie.Title}' is confirmed!
-                //     Date: {reservation.ReservationDate}
-                //     Time: {reservation.TimeSlot.TimeSlot}
-                //     Seats: {string.Join(", ", reservation.SeatNumbers)}
-                //     Total Price: {reservation.GetTotalPrice():C}
-                // ";
+                
                 var templatePath = Path.Combine("Services", "Email Service", "ReservationConfirmation.html");
                 var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
                 
                 var emailBody = htmlTemplate
-                    .Replace("{{reservation.User.FullName}}", reservation.User.FullName)
-                    .Replace("{{reservation.Movie.Title}}", reservation.Movie.Title)
-                    .Replace("{{reservation.ReservationDate}}", reservation.ReservationDate.ToString())
-                    .Replace("{{reservation.TimeSlot.TimeSlot}}", reservation.TimeSlot.TimeSlot.ToString())
-                    .Replace("{{reservation.SeatNumbers}}", string.Join(",", reservation.SeatNumbers))
-                    .Replace("{{reservation.GetTotalPrice():C}}", reservation.GetTotalPrice().ToString("C"));
+                    .Replace("{{reservation.User.FullName}}", fullReservation.User.FullName)
+                    .Replace("{{reservation.Movie.Title}}", fullReservation.Movie.Title)
+                    .Replace("{{reservation.Id}}",  fullReservation.Id.ToString())
+                    .Replace("{{reservation.ReservationDate}}", fullReservation.ReservationDate.ToString())
+                    .Replace("{{reservation.TimeSlot.TimeSlot}}", fullReservation.TimeSlot.TimeSlot.ToString())
+                    .Replace("{{reservation.SeatNumbers}}", string.Join(",", fullReservation.SeatNumbers))
+                    .Replace("{{reservation.GetTotalPrice():C}}", fullReservation.GetTotalPrice().ToString("C"));
                 
                 await _emailService.SendEmailAsync(fullReservation.User.Email, 
                     "Reservation Confirmation", emailBody);
