@@ -155,6 +155,20 @@ namespace MoviesReservationSystem.Controllers
             return Ok(reservations);
         }
         
+        //Get reservation by ReservationCode
+        [HttpGet("search")]
+        public async Task<IActionResult> GetMovieReservationByCode([FromQuery] string code)
+        {
+            var reservation = await _context.MovieReservations.FindAsync(code);
+
+            if (reservation == null)
+            {
+                return NotFound("No reservations found for this code.");
+            }
+            
+            return Ok(reservation);
+        }
+        
         //Cancel Reservation
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteMovieReservation([FromQuery] int id)

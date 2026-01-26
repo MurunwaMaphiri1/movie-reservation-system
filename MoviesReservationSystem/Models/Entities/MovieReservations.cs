@@ -11,6 +11,8 @@ public class MovieReservations
     
     [Required]
     public int UserId { get; set; }
+    
+    public string? ReservationCode { get; set; }
     public Users User { get; set; }
     
     [Required]
@@ -34,5 +36,11 @@ public class MovieReservations
     {
         if (Movie == null) return 0;
         return SeatNumbers.Length * Movie.TicketPrice;
+    }
+    
+    //Generate a random reservation code
+    public static string GenerateReservationCode()
+    {
+        return $"MBT-{Guid.NewGuid().ToString("N")[..8].ToUpper()}";
     }
 }

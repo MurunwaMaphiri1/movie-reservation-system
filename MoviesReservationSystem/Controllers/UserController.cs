@@ -99,9 +99,9 @@ namespace MoviesReservationSystem.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("Id", existingUser.Id.ToString()),
-                new Claim("Name", existingUser.FullName.ToString()),
-                new Claim("Email", existingUser.Email.ToString()),
-                new Claim("Role", existingUser.Role.ToString()),
+                new Claim("Name", existingUser.FullName),
+                new Claim("Email", existingUser.Email),
+                new Claim("Role", existingUser.Role)
             };
                 
             
