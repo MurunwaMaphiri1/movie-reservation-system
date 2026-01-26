@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Cancellation</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #080c14; font-family: 'Trebuchet MS', Arial, sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #080c14;">
+    <tr>
+        <td align="center" style="padding: 20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #101828; border-radius: 8px; overflow: hidden;">
+
+                <!-- Header with Logo -->
+                <tr>
+                    <td style="padding: 30px; background-color: #101828;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td>
+                                    <table cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="padding-right: 12px; vertical-align: middle;">
+                                                <img src="https://ik.imagekit.io/fa7vrszuse/movie.png?updatedAt=1744412390346"
+                                                     alt="MagicBox Logo"
+                                                     width="30"
+                                                     height="30"
+                                                     style="display: block;">
+                                            </td>
+                                            <td style="vertical-align: middle;">
+                                                <h2 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: bold;">
+                                                    MagicBox Theatres
+                                                </h2>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Hero Image -->
+                <tr>
+                    <td>
+                        <img src="https://images.unsplash.com/photo-1617914309185-9e63b3badfca?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                             alt="Cinema"
+                             width="600"
+                             style="display: block; width: 100%; height: auto;">
+                    </td>
+                </tr>
+
+                <!-- Confirmation Heading -->
+                <tr>
+                    <td style="padding: 40px 30px 20px; text-align: center;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold;">
+                            Reservation Cancellation Confirmed
+                        </h1>
+                    </td>
+                </tr>
+
+                <!-- Email Body -->
+                <tr>
+                    <td style="padding: 0 30px 40px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="color: #e5e7eb; font-size: 16px; line-height: 1.6;">
+                                    <p style="margin: 0 0 20px;">
+                                        Hello <strong>{{reservation.User.FullName}}</strong>,
+                                    </p>
+                                    <p style="margin: 0 0 20px; font-size: 14px">
+                                        This email is to confirm that your reservation for 
+                                        <strong>'{{reservation.Movie.Title}}'</strong> on 
+                                        <strong>{{reservation.ReservationDate}} - {{reservation.TimeSlot.TimeSlot}}</strong>
+                                        has been successfully cancelled, as requested.
+                                    </p>
+                                    <p style="margin: 0 0 20px; font-size: 14px">
+                                        Details of the cancelled reservation can be found below:
+                                    </p>
+
+                                    <!-- Reservation Details Box -->
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #1f2937; border-radius: 8px; border-left: 4px solid #3b82f6; font-size: 14px">
+                                        <tr>
+                                            <td style="padding: 20px;">
+                                                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">
+                                                            Reservation ID:
+                                                        </td>
+                                                        <td style="padding: 8px 0; color: #ffffff; font-size: 14px; font-weight: bold; text-align: right;">
+                                                            {{reservation.ReservationID}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">
+                                                            Date:
+                                                        </td>
+                                                        <td style="padding: 8px 0; color: #ffffff; font-size: 14px; font-weight: bold; text-align: right;">
+                                                            {{reservation.ReservationDate}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #9ca3af; font-size: 14px; border-top: 1px solid #374151;">
+                                                            Time:
+                                                        </td>
+                                                        <td style="padding: 8px 0; color: #ffffff; font-size: 14px; font-weight: bold; text-align: right; border-top: 1px solid #374151;">
+                                                            {{reservation.TimeSlot.TimeSlot}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #9ca3af; font-size: 14px; border-top: 1px solid #374151;">
+                                                            Seats:
+                                                        </td>
+                                                        <td style="padding: 8px 0; color: #ffffff; font-size: 14px; font-weight: bold; text-align: right; border-top: 1px solid #374151;">
+                                                            {{reservation.SeatNumbers}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 8px 0; color: #9ca3af; font-size: 14px; border-top: 1px solid #374151;">
+                                                            Total Price:
+                                                        </td>
+                                                        <td style="padding: 8px 0; color: #3b82f6; font-size: 18px; font-weight: bold; text-align: right; border-top: 1px solid #374151;">
+                                                            {{reservation.GetTotalPrice():C}}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin: 25px 0 0; color: #d1d5db; font-size: 14px;">
+                                        You will receive a full refund within 2-4 working days to the card used to make the reservation.
+                                    </p>
+                                    <p style="margin: 25px 0 0; color: #d1d5db; font-size: 14px;">
+                                        If you would like to rebook you can do so on the companies website.
+                                    </p>
+                                    <p style="margin: 25px 0 0; color: #d1d5db; font-size: 14px;">
+                                        We hope to see you again soon!
+                                    </p>
+                                    <p style="margin: 25px 0 0; color: #d1d5db; font-size: 14px;">
+                                        MagicBox Theatres Team
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding: 20px 30px; background-color: #0a0f1a; text-align: center;">
+                        <p style="margin: 0; color: #9ca3af; font-size: 13px;">
+                            © 2026 MagicBox Theatres. All rights reserved.
+                        </p>
+                        <p style="margin: 0; color: #9ca3af; font-size: 13px;">
+                            Made with ❤️ by Murunwa Maphiri
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

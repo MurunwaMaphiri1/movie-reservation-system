@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using MoviesReservationSystem.Models.DTO;
 using Newtonsoft.Json;
 using System.Text.Json;
+using MoviesReservationSystem.Services.Email_Service;
 using Stripe.Checkout;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -21,16 +22,18 @@ namespace MoviesReservationSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<MovieReservationsController> _logger;
+        private readonly IEmailService _emailService;
         
 
 
         public MovieReservationsController(ApplicationDbContext context, 
-            ILogger<MovieReservationsController> logger)
+            ILogger<MovieReservationsController> logger, IEmailService emailService)
         {
             _context = context;
             _logger = logger;
             DotNetEnv.Env.Load();
             StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
+            _emailService = emailService;
         }
         
         //Get all Movie reservations
@@ -173,20 +176,53 @@ namespace MoviesReservationSystem.Controllers
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteMovieReservation([FromQuery] int id)
         {
-            var reservation = await _context.MovieReservations.FindAsync(id);
-            
-            StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
-
-            var options = new RefundCreateOptions
+            try
             {
-                PaymentIntent = reservation.PaymentId,
-            };
-            
-            var service = new RefundService();
-            Refund refund = service.Create(options);
-            
-            _context.MovieReservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+                var reservation = await _context.MovieReservations
+                    .Include(r => r.User)
+                    .Include(r => r.Movie)
+                    .Include(r => r.TimeSlot)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                if (reservation == null)
+                {
+                    return NotFound("Reservation Not Found");
+                }
+
+                var templatePath =
+                    Path.Combine("Services", "Email Service", "ReservationCancellationConfirmation.html");
+                var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
+
+                var emailBody = htmlTemplate
+                    .Replace("{{reservation.User.FullName}}", reservation.User.FullName)
+                    .Replace("{{reservation.Movie.Title}}", reservation.Movie.Title)
+                    .Replace("{{reservation.Id}}", reservation.Id.ToString())
+                    .Replace("{{reservation.ReservationDate}}", reservation.ReservationDate.ToString())
+                    .Replace("{{reservation.TimeSlot.TimeSlot}}", reservation.TimeSlot.TimeSlot.ToString())
+                    .Replace("{{reservation.SeatNumbers}}", string.Join(",", reservation.SeatNumbers))
+                    .Replace("{{reservation.ReservationID}}", reservation.ReservationCode)
+                    .Replace("{{reservation.GetTotalPrice():C}}", reservation.GetTotalPrice().ToString("C"));
+
+                await _emailService.SendEmailAsync(reservation.User.Email,
+                    "Reservation Cancellation Confirmation", emailBody);
+
+                StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
+
+                var options = new RefundCreateOptions
+                {
+                    PaymentIntent = reservation.PaymentId,
+                };
+
+                var service = new RefundService();
+                Refund refund = service.Create(options);
+
+                _context.MovieReservations.Remove(reservation);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, e.Message);
+            }
             return NoContent();
         }
     }
