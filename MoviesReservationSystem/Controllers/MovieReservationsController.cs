@@ -135,7 +135,7 @@ namespace MoviesReservationSystem.Controllers
         }
         
         //Get movie reservations by UserId
-        [HttpGet("search")] 
+        [HttpGet("search-by-userId")] 
         public async Task<IActionResult> GetMovieReservationByUserId([FromQuery] int userId)
         {
             var reservations = await _context.MovieReservations
@@ -156,7 +156,7 @@ namespace MoviesReservationSystem.Controllers
         }
         
         //Get reservation by ReservationCode
-        [HttpGet("search")]
+        [HttpGet("search-by-rescode")]
         public async Task<IActionResult> GetMovieReservationByCode([FromQuery] string code)
         {
             var reservation = await _context.MovieReservations.FindAsync(code);
@@ -174,6 +174,17 @@ namespace MoviesReservationSystem.Controllers
         public async Task<IActionResult> DeleteMovieReservation([FromQuery] int id)
         {
             var reservation = await _context.MovieReservations.FindAsync(id);
+            
+            StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
+
+            var options = new RefundCreateOptions
+            {
+                PaymentIntent = reservation.PaymentId,
+            };
+            
+            var service = new RefundService();
+            Refund refund = service.Create(options);
+            
             _context.MovieReservations.Remove(reservation);
             await _context.SaveChangesAsync();
             return NoContent();
