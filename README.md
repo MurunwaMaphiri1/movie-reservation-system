@@ -270,10 +270,3 @@ The API should now be running at `http://localhost:7035`.
 **DELETE** `/api/moviereservations/delete/{id}`
 ##### Response 204 No content
 
----
-
-## 📌 Future Improvements
-- Add **Admin Role** for managing movies and reservations.
-- Add **Email** service confirming reservation when user creates a reservation.
-- Implement Redis
----
