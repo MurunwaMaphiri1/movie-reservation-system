@@ -68,6 +68,7 @@ namespace MoviesReservationSystem.Controllers
                 FullName = newEmployee.FullName,
                 Email = newEmployee.Email,
                 Password = newEmployee.Password,
+                PhoneNumber = newEmployee.PhoneNumber,
                 Role = newEmployee.Role
             };
             
