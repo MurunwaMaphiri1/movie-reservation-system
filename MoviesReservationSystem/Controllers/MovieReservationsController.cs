@@ -23,17 +23,19 @@ namespace MoviesReservationSystem.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<MovieReservationsController> _logger;
         private readonly IEmailService _emailService;
-        
+        private readonly IWebHostEnvironment _env;
 
 
         public MovieReservationsController(ApplicationDbContext context, 
-            ILogger<MovieReservationsController> logger, IEmailService emailService)
+            ILogger<MovieReservationsController> logger, IEmailService emailService,
+            IWebHostEnvironment env)
         {
             _context = context;
             _logger = logger;
             DotNetEnv.Env.Load();
             StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");
             _emailService = emailService;
+            _env = env;
         }
         
         //Get all Movie reservations
@@ -190,7 +192,7 @@ namespace MoviesReservationSystem.Controllers
                 }
 
                 var templatePath =
-                    Path.Combine("Services", "Email Service", "ReservationCancellationConfirmation.html");
+                    Path.Combine(_env.ContentRootPath, "Services", "Email Service", "ReservationCancellationConfirmation.html");
                 var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
 
                 var emailBody = htmlTemplate

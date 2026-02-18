@@ -24,7 +24,7 @@ namespace MoviesReservationSystem.Controllers
         [HttpGet]
         public async Task<ActionResult> GetMovies()
         {
-            var allMovies = _context.Movies.ToList();
+            var allMovies = await _context.Movies.ToListAsync();
             return Ok(allMovies);
         }
         

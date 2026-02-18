@@ -24,14 +24,17 @@ namespace MoviesReservationSystem.Controllers
         private readonly ILogger<WebhookController> _logger;
         private readonly string _webhookSecret;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _env;
 
         public WebhookController(ApplicationDbContext context, 
-            ILogger<WebhookController> logger, IEmailService emailService)
+            ILogger<WebhookController> logger, IEmailService emailService,
+            IWebHostEnvironment env)
         {
             _context = context;
             _logger = logger;
             _webhookSecret = Env.GetString("STRIPE_WEBHOOK_SECRET");
             _emailService = emailService;
+            _env = env;
         }
 
         [HttpPost]
@@ -114,7 +117,7 @@ namespace MoviesReservationSystem.Controllers
                     throw new Exception($"Reservation with id {reservation.Id} not found.");
                 
                 
-                var templatePath = Path.Combine("Services", "Email Service", "ReservationConfirmation.html");
+                var templatePath = Path.Combine(_env.ContentRootPath, "Services", "EmailService", "ReservationConfirmation.html");
                 var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
                 
                 var emailBody = htmlTemplate
