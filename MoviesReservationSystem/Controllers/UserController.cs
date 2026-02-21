@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Models.DTO;
 using MoviesReservationSystem.Models.Entities;
+using MoviesReservationSystem.Services.PasswordStrengthService;
 
 namespace MoviesReservationSystem.Controllers
 {
@@ -17,11 +18,14 @@ namespace MoviesReservationSystem.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
+        private readonly IPasswordStrengthService _passwordStrengthService;
 
-        public UserController(IConfiguration configuration, ApplicationDbContext context)
+        public UserController(IConfiguration configuration, ApplicationDbContext context,
+            IPasswordStrengthService passwordStrengthService)
         {
             _configuration = configuration;
             _context = context;
+            _passwordStrengthService = passwordStrengthService;
             Env.Load();
         }
 
@@ -64,18 +68,27 @@ namespace MoviesReservationSystem.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> registerUser([FromBody] Users users)
         {
-            users.Password = BCrypt.Net.BCrypt.HashPassword(users.Password);
-
-            var userEntity = new Users()
+            try
             {
-                FullName = users.FullName,
-                Email = users.Email,
-                Password = users.Password,
-            };
+                _passwordStrengthService.CheckPasswordStrength(users.Password);
             
-            _context.Users.Add(userEntity);
-            await _context.SaveChangesAsync();
-            return Ok(userEntity);
+                users.Password = BCrypt.Net.BCrypt.HashPassword(users.Password);
+
+                var userEntity = new Users()
+                {
+                    FullName = users.FullName,
+                    Email = users.Email,
+                    Password = users.Password
+                };
+            
+                _context.Users.Add(userEntity);
+                await _context.SaveChangesAsync();
+                return Ok(userEntity);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpPost("login")]

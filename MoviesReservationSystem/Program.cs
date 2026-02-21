@@ -9,6 +9,7 @@ using Stripe;
 using System.Text;
 using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Services.Email_Service;
+using MoviesReservationSystem.Services.PasswordStrengthService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPasswordStrengthService, PasswordStrengthService>();
 
 builder.Services.AddAuthentication(options =>
     {
