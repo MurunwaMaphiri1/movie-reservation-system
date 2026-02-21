@@ -8,17 +8,25 @@ The **Movie Reservation System** is a **.NET Core Web API** that allows users to
 - **Database:** PostgreSQL
 - **Authentication:** JWT
 - **Frontend:** React.js
+- **Containerization:** Docker
+- **Payment Processing:** Stripe
 
 ## 🚀 Features
 - **User Authentication**: Secure login and registration using JWT.
 - **Movie Management**: Add, update, delete, and list available movies.
 - **Showtime Scheduling**: Manage showtimes for different movies.
 - **Reservations**: Book, view, and cancel reservations.
+- **Payment Integration:** Secure checkout with Stripe.
+- **Email Notifications:** Reservation confirmation and cancellation emails using SendGrid.
 - **Error Handling**: Proper validation and error messages.
 
 ---
 
 ## 📌 Setup Instructions
+
+### Prerequisites
+- Docker
+- Git
 
 ### **1. Clone the Repository**
 ```bash
@@ -27,7 +35,6 @@ cd movie-reservation-system
 ```
 
 ### **2. Configure the Database**
-- Install **PostgreSQL** and create a database.
 - Create a `.env` file with your database, JWT and Stripe configuration settings:
 ```json
 #PostgreSQL configuration
@@ -48,13 +55,24 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 ```
 
-### **3. Run Database Migrations**
+### **3. Start the application**
+### With Docker
+```bash
+# Start all services (Backend and Database)
+docker-compose up --build
+
+#Stop all services
+docker-compose down
+```
+### Without Docker
+- Install **PostgreSQL** and create a database.
+- Update `.env` file with `DATABASE_HOST=localhost`
+  
+### **Run Migrations**
 ```bash
 dotnet ef database update
-```
 
-### **4. Run the API**
-```bash
+# Run API
 dotnet run
 ```
 The API should now be running at `http://localhost:7035`.
