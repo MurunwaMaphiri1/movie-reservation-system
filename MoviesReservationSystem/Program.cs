@@ -7,8 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Stripe;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.RateLimiting;
 using MoviesReservationSystem.Data;
-using MoviesReservationSystem.Services.Email_Service;
+using MoviesReservationSystem.Services.AuthService;
+using MoviesReservationSystem.Services.EmailService;
 using MoviesReservationSystem.Services.PasswordStrengthService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +41,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordStrengthService, PasswordStrengthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -60,6 +65,66 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, token) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = $"{retryAfter.TotalSeconds} seconds";
+
+            ProblemDetailsFactory problemDetailsFactory = context.HttpContext.RequestServices
+                .GetRequiredService<ProblemDetailsFactory>();
+            Microsoft.AspNetCore.Mvc.ProblemDetails problemDetails = problemDetailsFactory
+                .CreateProblemDetails(
+                    context.HttpContext,
+                    StatusCodes.Status429TooManyRequests,
+                    "Too Many Requests",
+                    detail: $"Too many requests. Please try again after {retryAfter.TotalSeconds} seconds."
+                );
+            await context.HttpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: token);
+        }
+    };
+    
+    // Browsing
+    options.AddTokenBucketLimiter("browsing", opt =>
+    {
+        opt.TokenLimit = 30;
+        opt.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
+        opt.TokensPerPeriod = 10;
+        opt.AutoReplenishment = true;
+    });
+    
+    // Booking
+    options.AddTokenBucketLimiter("booking", opt =>
+    {
+        opt.TokenLimit = 5;
+        opt.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
+        opt.TokensPerPeriod = 2;
+        opt.AutoReplenishment = true;
+    });
+    
+    // Auth
+    options.AddTokenBucketLimiter("auth", opt =>
+    {
+        opt.TokenLimit = 5;
+        opt.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
+        opt.TokensPerPeriod = 1;
+        opt.AutoReplenishment = true;
+    });
+    
+    //Search Movie
+    options.AddTokenBucketLimiter("search", opt =>
+    {
+        opt.TokenLimit = 20;
+        opt.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
+        opt.TokensPerPeriod = 10;
+        opt.AutoReplenishment = true;
+    });
+});
 
 builder.Services.AddOptions();
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesReservationSystem.Models.DTO;
 using MoviesReservationSystem.Models.Entities;
-using MoviesReservationSystem.Services.Email_Service;
+using MoviesReservationSystem.Services.EmailService;
 using RestSharp.Serializers;
 using Stripe;
 using Stripe.Checkout;

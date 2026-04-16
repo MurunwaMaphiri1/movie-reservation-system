@@ -65,6 +65,7 @@ namespace MoviesReservationSystem.Controllers
             return Ok(userToUpdate);
         }
 
+        /*
         [HttpPost("register")]
         public async Task<IActionResult> registerUser([FromBody] Users users)
         {
@@ -128,6 +129,6 @@ namespace MoviesReservationSystem.Controllers
             );
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             return Ok(new { token = tokenString , user = new { userId = existingUser.Id, existingUser.FullName, existingUser.Email }});
-        }
+        }*/
     }
 }

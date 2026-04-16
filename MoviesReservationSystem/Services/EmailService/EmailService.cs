@@ -2,13 +2,8 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace MoviesReservationSystem.Services.Email_Service
+namespace MoviesReservationSystem.Services.EmailService
 {
-    public interface IEmailService
-    {
-        Task SendEmailAsync(string to, string subject, string body);
-    }
-    
     public class EmailService : IEmailService
     {
         public async Task SendEmailAsync(string to, string subject, string body)
@@ -18,7 +13,6 @@ namespace MoviesReservationSystem.Services.Email_Service
                 Env.GetString("EmailAddress")));
             message.To.Add(new MailboxAddress("", to));
             message.Subject = subject;
-            // message.Body = new TextPart("plain") { Text = body };
             message.Body = new TextPart("html") { Text = body };
 
             using (var client = new SmtpClient())

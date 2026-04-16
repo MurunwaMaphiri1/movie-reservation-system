@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using MoviesReservationSystem.Models.DTO;
 using Newtonsoft.Json;
 using System.Text.Json;
-using MoviesReservationSystem.Services.Email_Service;
+using MoviesReservationSystem.Services.EmailService;
 using Stripe.Checkout;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
