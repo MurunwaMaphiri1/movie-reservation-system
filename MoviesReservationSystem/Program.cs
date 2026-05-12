@@ -14,6 +14,9 @@ using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Services.AuthService;
 using MoviesReservationSystem.Services.EmailService;
 using MoviesReservationSystem.Services.PasswordStrengthService;
+using MoviesReservationSystem.Services.RedisService;
+using StackExchange.Redis;
+using NRedisStack;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,9 +42,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString);
 });
 
+ConfigurationOptions conf = new ConfigurationOptions
+{
+    EndPoints = { "redis:6379" }
+};
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordStrengthService, PasswordStrengthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(conf));
+builder.Services.AddSingleton<ISeatLockService, SeatLockService>();
 
 builder.Services.AddAuthentication(options =>
     {

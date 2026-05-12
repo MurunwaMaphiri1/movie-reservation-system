@@ -29,6 +29,8 @@
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="NRedisStack" Version="1.3.0" />
+        <PackageReference Include="StackExchange.Redis" Version="2.12.14" />
         <PackageReference Include="Stripe" Version="1.12.0" />
         <PackageReference Include="Stripe.net" Version="48.0.0" />
         <PackageReference Include="Stripe.Webhooks.Module" Version="2.0.0" />
