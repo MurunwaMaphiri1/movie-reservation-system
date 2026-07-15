@@ -22,7 +22,8 @@ namespace MoviesReservationSystem.Services.RedisService
                 var key = $"seat:lock:{seatLockDTO.MovieId}:{seatLockDTO.Date}:{seatLockDTO.TimeSlotId}:{seat}";
         
                 Console.WriteLine($"Attempting to lock key: {key}");
-        
+                
+                // Include the userId as the key for session restoration functionality
                 bool locked = await db.StringSetAsync(key, seatLockDTO.UserId.ToString(),
                     TimeSpan.FromMinutes(10), When.NotExists);
 
