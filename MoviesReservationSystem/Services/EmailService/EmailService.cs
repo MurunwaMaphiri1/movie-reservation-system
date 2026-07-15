@@ -1,5 +1,6 @@
 ﻿using DotNetEnv;
 using MailKit.Net.Smtp;
+using MailKit;
 using MimeKit;
 
 namespace MoviesReservationSystem.Services.EmailService

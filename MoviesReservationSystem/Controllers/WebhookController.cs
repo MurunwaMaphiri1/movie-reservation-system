@@ -1,17 +1,13 @@
 ﻿using System.Text.Json;
 using DotNetEnv;
-using MoviesReservationSystem.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesReservationSystem.Models.DTO;
 using MoviesReservationSystem.Models.Entities;
 using MoviesReservationSystem.Services.EmailService;
-using RestSharp.Serializers;
 using Stripe;
 using Stripe.Checkout;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using System.IO;
-using Stripe.Webhooks.Module;
 using ApplicationDbContext = MoviesReservationSystem.Data.ApplicationDbContext;
 
 namespace MoviesReservationSystem.Controllers
@@ -32,6 +28,7 @@ namespace MoviesReservationSystem.Controllers
         {
             _context = context;
             _logger = logger;
+            DotNetEnv.Env.Load();
             _webhookSecret = Env.GetString("STRIPE_WEBHOOK_SECRET");
             _emailService = emailService;
             _env = env;
