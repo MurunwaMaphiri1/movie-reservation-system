@@ -18,28 +18,28 @@ namespace MoviesReservationSystem.Controllers
             _logger = logger;
             _seatLockService = seatLockService;
         }
-        
+
         // Get Locked Seats
         [HttpGet("locked-seats")]
         public async Task<IActionResult> GetLockedSeats([FromQuery] int movieId, [FromQuery] DateOnly date,
             [FromQuery] int timeSlotId)
         {
-            var lockedSeats = _seatLockService.GetLockedSeats(movieId, date, timeSlotId);
+            var lockedSeats = await _seatLockService.GetLockedSeats(movieId, date, timeSlotId);
             return Ok(lockedSeats);
         }
-        
+
         // Lock Seat
         [HttpPost("lock")]
         public async Task<IActionResult> LockSeatSelection([FromBody] SeatLockDTO seatLockDTO)
         {
-            var failedLocks = await _seatLockService.LockSeats(seatLockDTO);
-            
-            if (failedLocks.Any()) 
-                return Conflict(new { message = "Some seats are already locked", seats = failedLocks });
+            var result = await _seatLockService.LockSeats(seatLockDTO);
+
+            if (result.Failed.Any())
+                return Conflict(new { message = "Some seats are already locked", seats = result });
 
             return Ok(new { message = "Seats locked successfully" });
         }
-        
+
         // Unlock seat
         [HttpDelete("unlock")]
         public async Task<IActionResult> UnlockSeatSelection([FromBody] SeatLockDTO seatLockDTO)
@@ -47,6 +47,5 @@ namespace MoviesReservationSystem.Controllers
             await _seatLockService.UnlockSeats(seatLockDTO);
             return Ok(new { message = "Seats unlocked successfully" });
         }
-    }    
+    }
 }
-
