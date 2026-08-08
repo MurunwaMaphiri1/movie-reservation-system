@@ -41,8 +41,12 @@ namespace MoviesReservationSystem.Services.RedisService
             var lockedKeys = (RedisResult[])await db.ScriptEvaluateAsync(
                 LockScript, keys, new RedisValue[] { dto.UserId.ToString(), 600 });
 
-            var lockedSeats = lockedKeys.Select(k => (string)k).ToHashSet();
-            var failedSeats = dto.SeatNumbers.Where(s => !lockedKeys.Any(k => ((string)k).Contains(s))).ToList();
+            var lockedSeats = lockedKeys
+                .Select(k => ((string)k).Split(':').Last())
+                .ToHashSet();
+            var failedSeats = dto.SeatNumbers
+                .Where(seat => !lockedSeats.Contains(seat))
+                .ToList();
 
             return new SeatLockResult { Locked = lockedSeats.ToList(), Failed = failedSeats };
         }
