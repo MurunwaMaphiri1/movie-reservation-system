@@ -129,6 +129,9 @@ builder.Services.AddRateLimiter(options =>
     // Booking
     AddPerCallerTokenBucket("booking", tokenLimit: 5, tokensPerPeriod: 2, TimeSpan.FromMinutes(1));
 
+    // Seat locking: the frontend sends one lock/unlock request per seat click, so this needs headroom
+    AddPerCallerTokenBucket("seat-lock", tokenLimit: 30, tokensPerPeriod: 10, TimeSpan.FromSeconds(30));
+
     // Auth
     AddPerCallerTokenBucket("auth", tokenLimit: 5, tokensPerPeriod: 1, TimeSpan.FromMinutes(1));
 
