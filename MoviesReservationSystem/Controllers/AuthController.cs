@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MoviesReservationSystem.Models.DTO;
 using MoviesReservationSystem.Models.Entities;
 using MoviesReservationSystem.Services.AuthService;
@@ -8,7 +9,7 @@ namespace MoviesReservationSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    
+    [EnableRateLimiting("auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

@@ -63,6 +63,14 @@ namespace MoviesReservationSystem.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("MovieId")
                         .HasColumnType("integer");
 
@@ -82,7 +90,7 @@ namespace MoviesReservationSystem.Migrations
                     b.Property<int>("TimeSlotId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -209,8 +217,7 @@ namespace MoviesReservationSystem.Migrations
                     b.HasOne("MoviesReservationSystem.Models.Entities.Users", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Movie");
 

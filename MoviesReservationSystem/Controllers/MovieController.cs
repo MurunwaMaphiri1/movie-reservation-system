@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Models.Entities;
@@ -7,6 +9,7 @@ namespace MoviesReservationSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("browsing")]
     public class MovieController: ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -37,6 +40,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpGet("get-movie/movie-title/{title}")]
+        [EnableRateLimiting("search")]
         public async Task<ActionResult> GetMovieByTitle(string title)
         {
             var movie = await _context.Movies
@@ -49,6 +53,7 @@ namespace MoviesReservationSystem.Controllers
         
         //Add movie
         [HttpPost("add-movie")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> AddMovie([FromBody] List<Movies> movie)
         {
             await _context.Movies.AddRangeAsync(movie);
@@ -58,6 +63,7 @@ namespace MoviesReservationSystem.Controllers
         
         //Update Movie
         [HttpPut("{id}/update-movie")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateMovie(int id, [FromBody] Movies movie)
         {
             var movieToUpdate = await _context.Movies.FindAsync(id);
@@ -78,6 +84,7 @@ namespace MoviesReservationSystem.Controllers
         
         //Delete Movie
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
             var movie = await _context.Movies.FindAsync(id);

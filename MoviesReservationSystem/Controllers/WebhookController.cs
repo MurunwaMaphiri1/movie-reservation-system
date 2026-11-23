@@ -84,6 +84,8 @@ namespace MoviesReservationSystem.Controllers
                 var reservation = new MovieReservations()
                 {
                     UserId = reservationDetails.UserId,
+                    FullName = reservationDetails.FullName,
+                    Email = reservationDetails.Email,
                     MovieId = reservationDetails.MovieId,
                     ReservationDate = reservationDetails.ReservationDate,
                     TimeSlotId = reservationDetails.TimeSlotId,
@@ -105,7 +107,6 @@ namespace MoviesReservationSystem.Controllers
                 await _context.SaveChangesAsync();
                 
                 var fullReservation = await _context.MovieReservations
-                    .Include(r=> r.User)
                     .Include(r=> r.Movie)
                     .Include(r => r.TimeSlot)
                     .FirstOrDefaultAsync(r => r.Id == reservation.Id);
@@ -118,7 +119,7 @@ namespace MoviesReservationSystem.Controllers
                 var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
                 
                 var emailBody = htmlTemplate
-                    .Replace("{{reservation.User.FullName}}", fullReservation.User.FullName)
+                    .Replace("{{reservation.User.FullName}}", fullReservation.FullName)
                     .Replace("{{reservation.Movie.Title}}", fullReservation.Movie.Title)
                     .Replace("{{reservation.Id}}",  fullReservation.Id.ToString())
                     .Replace("{{reservation.ReservationDate}}", fullReservation.ReservationDate.ToString())
@@ -127,7 +128,7 @@ namespace MoviesReservationSystem.Controllers
                     .Replace("{{reservation.ReservationID}}", reservation.ReservationCode)
                     .Replace("{{reservation.GetTotalPrice():C}}", fullReservation.GetTotalPrice().ToString("C"));
                 
-                await _emailService.SendEmailAsync(fullReservation.User.Email, 
+                await _emailService.SendEmailAsync(fullReservation.Email,
                     "Reservation Confirmation", emailBody);
                 
                 _logger.LogInformation("Reservation completed for {MovieId}", reservation.MovieId);

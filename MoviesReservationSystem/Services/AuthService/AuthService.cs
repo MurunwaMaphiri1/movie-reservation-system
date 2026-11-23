@@ -16,14 +16,11 @@ namespace MoviesReservationSystem.Services.AuthService
     {
         private readonly IPasswordStrengthService  _passwordStrengthService;
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
 
-        public AuthService(IPasswordStrengthService passwordStrengthService, ApplicationDbContext context, 
-            IConfiguration configuration)
+        public AuthService(IPasswordStrengthService passwordStrengthService, ApplicationDbContext context)
         {
             _passwordStrengthService = passwordStrengthService;
             _context = context;
-            _configuration = configuration;
         }
 
         public async Task<Users> RegisterUser(Users user)
@@ -63,16 +60,18 @@ namespace MoviesReservationSystem.Services.AuthService
                 new Claim("Id", existingUser.Id.ToString()),
                 new Claim("Name", existingUser.FullName),
                 new Claim("Email", existingUser.Email),
-                new Claim("Role", existingUser.Role)
+                new Claim("Role", existingUser.Role),
+                new Claim("AccountType", "User")
             };
                 
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
-                _configuration["JwtConfig:Issuer"],
-                _configuration["JwtConfig:Audience"],
+                Env.GetString("DATABASE_ISSUER"),
+                Env.GetString("DATABASE_AUDIENCE"),
                 claims,
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
             );
             

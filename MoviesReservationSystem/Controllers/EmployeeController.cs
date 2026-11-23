@@ -2,7 +2,9 @@
 using System.Security.Claims;
 using System.Text;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MoviesReservationSystem.Data;
@@ -13,19 +15,19 @@ namespace MoviesReservationSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("browsing")]
     public class EmployeeController: ControllerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
 
-        public EmployeeController(IConfiguration configuration, ApplicationDbContext context)
+        public EmployeeController(ApplicationDbContext context)
         {
-            _configuration = configuration;
             _context = context;
             Env.Load();
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetEmployees()
         {
             var allEmployees = _context.Employees.ToList();
@@ -33,6 +35,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
             var employee = await _context.Employees.FindAsync(id);
@@ -40,6 +43,8 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpGet("search")]
+        [EnableRateLimiting("search")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetEmployeesByFullName(string FullName)
         {
             var employee = await _context.Employees
@@ -49,6 +54,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpPatch("change-employee-role")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeEmployeeRole([FromBody] ChangeEmployeeRoleDTO changeEmployeeRoleDto)
         {
             var empToUpdate = await _context.Employees.FindAsync(changeEmployeeRoleDto.EmployeeId);
@@ -59,6 +65,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpPost("add-employee")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddEmployee([FromBody] Employees newEmployee)
         {
             newEmployee.Password = BCrypt.Net.BCrypt.HashPassword(newEmployee.Password);
@@ -78,6 +85,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpDelete("delete-employee/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             var empToDelete = await _context.Employees.FindAsync(id);
@@ -88,6 +96,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> empLogin([FromBody] LoginRequestDTO loginRequestDto)
         {
             var jwtKey = Env.GetString("JWT_SECRET_KEY");
@@ -112,15 +121,17 @@ namespace MoviesReservationSystem.Controllers
                 new Claim("Id", existingEmp.EmployeeId.ToString()),
                 new Claim("Name", existingEmp.FullName),
                 new Claim("Email", existingEmp.Email),
-                new Claim("Role", existingEmp.Role)
+                new Claim("Role", existingEmp.Role),
+                new Claim("AccountType", "Employee")
             };
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
-                _configuration["JwtConfig:Issuer"],
-                _configuration["JwtConfig:Audience"],
+                Env.GetString("DATABASE_ISSUER"),
+                Env.GetString("DATABASE_AUDIENCE"),
                 claims,
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
             );
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);

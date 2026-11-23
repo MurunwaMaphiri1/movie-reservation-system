@@ -50,7 +50,7 @@ ConfigurationOptions conf = new ConfigurationOptions
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordStrengthService, PasswordStrengthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(conf));
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(conf));
 builder.Services.AddSingleton<ISeatLockService, SeatLockService>();
 
 builder.Services.AddAuthentication(options =>
@@ -69,10 +69,12 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            RequireExpirationTime = false,
+            RequireExpirationTime = true,
             ValidIssuer = Env.GetString("DATABASE_ISSUER"),
             ValidAudience = Env.GetString("DATABASE_AUDIENCE"),
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            // Tokens carry a bare "Role" claim, not the ClaimTypes.Role URI that IsInRole expects by default
+            RoleClaimType = "Role"
         };
     });
 
@@ -99,41 +101,39 @@ builder.Services.AddRateLimiter(options =>
         }
     };
     
+    // Each caller gets their own bucket, keyed on user id when authenticated and falling back to IP
+    void AddPerCallerTokenBucket(string policyName, int tokenLimit, int tokensPerPeriod,
+        TimeSpan replenishmentPeriod)
+    {
+        options.AddPolicy(policyName, httpContext =>
+        {
+            var accountId = httpContext.User.FindFirst("Id")?.Value;
+            var caller = accountId != null
+                ? $"{httpContext.User.FindFirst("AccountType")?.Value}:{accountId}"
+                : httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+
+            return RateLimitPartition.GetTokenBucketLimiter($"{policyName}:{caller}",
+                _ => new TokenBucketRateLimiterOptions
+                {
+                    TokenLimit = tokenLimit,
+                    ReplenishmentPeriod = replenishmentPeriod,
+                    TokensPerPeriod = tokensPerPeriod,
+                    AutoReplenishment = true
+                });
+        });
+    }
+
     // Browsing
-    options.AddTokenBucketLimiter("browsing", opt =>
-    {
-        opt.TokenLimit = 30;
-        opt.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
-        opt.TokensPerPeriod = 10;
-        opt.AutoReplenishment = true;
-    });
-    
+    AddPerCallerTokenBucket("browsing", tokenLimit: 30, tokensPerPeriod: 10, TimeSpan.FromSeconds(10));
+
     // Booking
-    options.AddTokenBucketLimiter("booking", opt =>
-    {
-        opt.TokenLimit = 5;
-        opt.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
-        opt.TokensPerPeriod = 2;
-        opt.AutoReplenishment = true;
-    });
-    
+    AddPerCallerTokenBucket("booking", tokenLimit: 5, tokensPerPeriod: 2, TimeSpan.FromMinutes(1));
+
     // Auth
-    options.AddTokenBucketLimiter("auth", opt =>
-    {
-        opt.TokenLimit = 5;
-        opt.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
-        opt.TokensPerPeriod = 1;
-        opt.AutoReplenishment = true;
-    });
-    
+    AddPerCallerTokenBucket("auth", tokenLimit: 5, tokensPerPeriod: 1, TimeSpan.FromMinutes(1));
+
     //Search Movie
-    options.AddTokenBucketLimiter("search", opt =>
-    {
-        opt.TokenLimit = 20;
-        opt.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
-        opt.TokensPerPeriod = 10;
-        opt.AutoReplenishment = true;
-    });
+    AddPerCallerTokenBucket("search", tokenLimit: 20, tokensPerPeriod: 10, TimeSpan.FromMinutes(1));
 });
 
 builder.Services.AddOptions();
@@ -164,6 +164,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Must precede UseRateLimiter so limiter partitions can key on the authenticated user
+app.UseAuthentication();
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 
