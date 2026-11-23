@@ -41,7 +41,9 @@ CREATE TABLE "Employees" (
 -- MovieReservations table (with foreign keys)
 CREATE TABLE "MovieReservations" (
                                      "Id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                     "UserId" INTEGER NOT NULL,
+                                     "UserId" INTEGER,
+                                     "FullName" TEXT NOT NULL,
+                                     "Email" TEXT NOT NULL,
                                      "ReservationCode" TEXT,
                                      "MovieId" INTEGER NOT NULL,
                                      "PaymentId" TEXT,
@@ -51,7 +53,7 @@ CREATE TABLE "MovieReservations" (
 
     -- Foreign key constraints
                                      CONSTRAINT "FK_MovieReservations_Users_UserId"
-                                         FOREIGN KEY ("UserId") REFERENCES "Users"("Id") ON DELETE CASCADE,
+                                         FOREIGN KEY ("UserId") REFERENCES "Users"("Id") ON DELETE SET NULL,
                                      CONSTRAINT "FK_MovieReservations_Movies_MovieId"
                                          FOREIGN KEY ("MovieId") REFERENCES "Movies"("Id") ON DELETE CASCADE,
                                      CONSTRAINT "FK_MovieReservations_TimeSlots_TimeSlotId"

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Models.DTO;
 using MoviesReservationSystem.Services.RedisService;
@@ -21,6 +22,7 @@ namespace MoviesReservationSystem.Controllers
 
         // Get Locked Seats
         [HttpGet("locked-seats")]
+        [EnableRateLimiting("browsing")]
         public async Task<IActionResult> GetLockedSeats([FromQuery] int movieId, [FromQuery] DateOnly date,
             [FromQuery] int timeSlotId)
         {
@@ -30,6 +32,7 @@ namespace MoviesReservationSystem.Controllers
 
         // Lock Seat
         [HttpPost("lock")]
+        [EnableRateLimiting("booking")]
         public async Task<IActionResult> LockSeatSelection([FromBody] SeatLockDTO seatLockDTO)
         {
             var result = await _seatLockService.LockSeats(seatLockDTO);
@@ -42,6 +45,7 @@ namespace MoviesReservationSystem.Controllers
 
         // Unlock seat
         [HttpDelete("unlock")]
+        [EnableRateLimiting("booking")]
         public async Task<IActionResult> UnlockSeatSelection([FromBody] SeatLockDTO seatLockDTO)
         {
             await _seatLockService.UnlockSeats(seatLockDTO);

@@ -9,11 +9,17 @@ public class MovieReservations
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
+    // Null for guest bookings
+    public int? UserId { get; set; }
+    public Users? User { get; set; }
+
     [Required]
-    public int UserId { get; set; }
-    
+    public string FullName { get; set; } = string.Empty;
+
+    [Required]
+    public string Email { get; set; } = string.Empty;
+
     public string? ReservationCode { get; set; }
-    public Users User { get; set; }
     
     [Required]
     public int MovieId { get; set; }

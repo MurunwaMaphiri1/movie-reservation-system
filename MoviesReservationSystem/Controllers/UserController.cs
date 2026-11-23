@@ -2,7 +2,9 @@
 using System.Security.Claims;
 using System.Text;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MoviesReservationSystem.Data;
@@ -14,6 +16,7 @@ namespace MoviesReservationSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("browsing")]
     public class UserController: ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -30,6 +33,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers()
         {
             var allUsers = _context.Users.ToList();
@@ -37,6 +41,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetUserById(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -44,6 +49,8 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpGet("search")]
+        [EnableRateLimiting("search")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetUserByFullName([FromQuery] string FullName)
         {
             var user = await _context.Users
@@ -56,6 +63,7 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpPatch("change-user-role")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeUserRole([FromBody] ChangeUserRoleDTO changeUserRoleDTO)
         {
             var userToUpdate = await _context.Users.FindAsync(changeUserRoleDTO.Id);

@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Models.Entities;
@@ -37,9 +39,18 @@ namespace MoviesReservationSystem.Controllers
             _emailService = emailService;
             _env = env;
         }
+
+        // Employee tokens also carry an "Id" claim, but it refers to the Employees table, not Users
+        private int? GetCustomerUserId() =>
+            User.FindFirst("AccountType")?.Value == "User"
+            && int.TryParse(User.FindFirst("Id")?.Value, out var id)
+                ? id
+                : null;
         
         //Get all Movie reservations
         [HttpGet]
+        [EnableRateLimiting("browsing")]
+        [Authorize(Roles = "Admin,Manager,Staff")]
         public async Task<IActionResult> GetMovieReservations()
         {
             var allMovieRes = _context.MovieReservations.ToList();
@@ -48,6 +59,7 @@ namespace MoviesReservationSystem.Controllers
         
         //Get taken seats
         [HttpGet("taken-seats/{movieId}/{date}/{timeSlotId}")]
+        [EnableRateLimiting("browsing")]
         public async Task<IActionResult> GetTakenSeats([FromRoute] DateOnly date, [FromRoute] int timeSlotId, 
             [FromRoute] int movieId)
         {
@@ -62,8 +74,12 @@ namespace MoviesReservationSystem.Controllers
         }
 
         [HttpPost("create-checkout")]
+        [EnableRateLimiting("booking")]
         public async Task<IActionResult> CreateCheckout([FromBody] MovieReservationDTO movieReservation)
         {
+            // Guests have no token, so UserId stays null; a client-supplied UserId is never trusted
+            movieReservation.UserId = GetCustomerUserId();
+
             try
             {
                 // Check for seat conflicts
@@ -139,17 +155,19 @@ namespace MoviesReservationSystem.Controllers
             }
         }
         
-        //Get movie reservations by UserId
-        [HttpGet("search-by-userId")] 
-        public async Task<IActionResult> GetMovieReservationByUserId([FromQuery] int userId)
+        //Get the logged-in user's reservations
+        [HttpGet("my-reservations")]
+        [EnableRateLimiting("search")]
+        [Authorize]
+        public async Task<IActionResult> GetMyReservations()
         {
+            if (GetCustomerUserId() is not int userId)
+                return Forbid();
+
             var reservations = await _context.MovieReservations
                 .Where(r => r.UserId == userId)
-                .Include(r => r.User) 
-                .Include(r => r.Movie) 
-                // .Include(r => r.ReservationDate)
+                .Include(r => r.Movie)
                 .Include(r => r.TimeSlot)
-                // .Include(r => r.SeatNumbers.Length)
                 .ToListAsync();
 
             if (reservations == null || reservations.Count == 0)
@@ -162,9 +180,12 @@ namespace MoviesReservationSystem.Controllers
         
         //Get reservation by ReservationCode
         [HttpGet("search-by-rescode")]
+        [EnableRateLimiting("search")]
+        [Authorize(Roles = "Admin,Manager,Staff")]
         public async Task<IActionResult> GetMovieReservationByCode([FromQuery] string code)
         {
-            var reservation = await _context.MovieReservations.FindAsync(code);
+            var reservation = await _context.MovieReservations
+                .FirstOrDefaultAsync(r => r.ReservationCode == code);
 
             if (reservation == null)
             {
@@ -176,15 +197,17 @@ namespace MoviesReservationSystem.Controllers
         
         //Cancel Reservation
         [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteMovieReservation([FromQuery] int id)
+        [EnableRateLimiting("booking")]
+        public async Task<IActionResult> DeleteMovieReservation([FromQuery] string code, [FromQuery] string email)
         {
             try
             {
+                // Code + email together prove ownership, for guests and account holders alike
                 var reservation = await _context.MovieReservations
-                    .Include(r => r.User)
                     .Include(r => r.Movie)
                     .Include(r => r.TimeSlot)
-                    .FirstOrDefaultAsync(r => r.Id == id);
+                    .FirstOrDefaultAsync(r => r.ReservationCode == code
+                                              && r.Email.ToLower() == email.ToLower());
 
                 if (reservation == null)
                 {
@@ -192,11 +215,11 @@ namespace MoviesReservationSystem.Controllers
                 }
 
                 var templatePath =
-                    Path.Combine(_env.ContentRootPath, "Services", "Email Service", "ReservationCancellationConfirmation.html");
+                    Path.Combine(_env.ContentRootPath, "Services", "EmailService", "ReservationCancellationConfirmation.html");
                 var htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
 
                 var emailBody = htmlTemplate
-                    .Replace("{{reservation.User.FullName}}", reservation.User.FullName)
+                    .Replace("{{reservation.User.FullName}}", reservation.FullName)
                     .Replace("{{reservation.Movie.Title}}", reservation.Movie.Title)
                     .Replace("{{reservation.Id}}", reservation.Id.ToString())
                     .Replace("{{reservation.ReservationDate}}", reservation.ReservationDate.ToString())
@@ -205,7 +228,7 @@ namespace MoviesReservationSystem.Controllers
                     .Replace("{{reservation.ReservationID}}", reservation.ReservationCode)
                     .Replace("{{reservation.GetTotalPrice():C}}", reservation.GetTotalPrice().ToString("C"));
 
-                await _emailService.SendEmailAsync(reservation.User.Email,
+                await _emailService.SendEmailAsync(reservation.Email,
                     "Reservation Cancellation Confirmation", emailBody);
 
                 StripeConfiguration.ApiKey = Env.GetString("STRIPE_SECRET_KEY");

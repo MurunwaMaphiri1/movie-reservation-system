@@ -26,6 +26,13 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<TimeSlots>()
             .Property(e => e.TimeSlot)
             .HasColumnType("time");
-        
+
+        // Deleting an account keeps its paid reservations; they still carry FullName/Email
+        modelBuilder.Entity<MovieReservations>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
     }
 }

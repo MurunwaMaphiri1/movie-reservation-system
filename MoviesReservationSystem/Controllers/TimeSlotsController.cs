@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MoviesReservationSystem.Data;
 using MoviesReservationSystem.Models.Entities;
@@ -7,6 +9,7 @@ namespace MovieReservationsSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("browsing")]
     public class TimeSlotsController: ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,6 +29,7 @@ namespace MovieReservationsSystem.Controllers
     
         //Add timeslots
         [HttpPost("add-time-slot")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> AddTimeslots(TimeSlots timeSlots)
         {
             _context.TimeSlots.Add(timeSlots);
@@ -54,6 +58,7 @@ namespace MovieReservationsSystem.Controllers
         
         //Delete Timeslot
         [HttpDelete("delete-time-slot/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTimeSlot(int id)
         {
             var timeSlot = await _context.TimeSlots.FindAsync(id);
@@ -65,6 +70,7 @@ namespace MovieReservationsSystem.Controllers
     
         //Update Timeslot
         [HttpPut("update-time-slot/{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateTimeSlot([FromQuery] int id, TimeSlots timeSlot)
         {
             if (id != timeSlot.TimeSlotId) return BadRequest();

@@ -21,16 +21,21 @@ namespace MoviesReservationSystem.Services.RedisService
             end
             return locked";
 
+        // Only releases keys whose stored value matches the caller's holder id
+        private const string UnlockScript = @"
+            for i, key in ipairs(KEYS) do
+                if redis.call('GET', key) == ARGV[1] then
+                    redis.call('DEL', key)
+                end
+            end
+            return 1";
 
-        public async Task UnlockSeats(SeatLockDTO seatLockDTO)
+        public async Task UnlockSeats(SeatLockDTO dto)
         {
             var db = _redis.GetDatabase();
+            var keys = dto.SeatNumbers.Select(seat => (RedisKey)$"seat:lock:{dto.MovieId}:{dto.Date}:{dto.TimeSlotId}:{seat}").ToArray();
 
-            foreach (var seat in seatLockDTO.SeatNumbers)
-            {
-                var key = $"seat:lock:{seatLockDTO.MovieId}:{seatLockDTO.Date}:{seatLockDTO.TimeSlotId}:{seat}";
-                await db.KeyDeleteAsync(key);
-            }
+            await db.ScriptEvaluateAsync(UnlockScript, keys, new RedisValue[] { dto.HolderId });
         }
 
         public async Task<SeatLockResult> LockSeats(SeatLockDTO dto)
@@ -39,7 +44,7 @@ namespace MoviesReservationSystem.Services.RedisService
             var keys = dto.SeatNumbers.Select(seat => (RedisKey)$"seat:lock:{dto.MovieId}:{dto.Date}:{dto.TimeSlotId}:{seat}").ToArray();
 
             var lockedKeys = (RedisResult[])await db.ScriptEvaluateAsync(
-                LockScript, keys, new RedisValue[] { dto.UserId.ToString(), 600 });
+                LockScript, keys, new RedisValue[] { dto.HolderId, 600 });
 
             var lockedSeats = lockedKeys
                 .Select(k => ((string)k).Split(':').Last())

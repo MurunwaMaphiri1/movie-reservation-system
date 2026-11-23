@@ -1,4 +1,6 @@
-﻿namespace MoviesReservationSystem.Models.DTO
+using System.ComponentModel.DataAnnotations;
+
+namespace MoviesReservationSystem.Models.DTO
 {
     public class SeatLockDTO
     {
@@ -6,7 +8,10 @@
         public DateOnly Date { get; set; }
         public int TimeSlotId { get; set; }
         public string[] SeatNumbers { get; set; }
-        public int UserId { get; set; }
-    }    
+
+        // Random id the frontend generates once per browser session; identifies who holds the lock
+        [Required]
+        public string HolderId { get; set; } = string.Empty;
+    }
 }
 
