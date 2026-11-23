@@ -32,7 +32,7 @@ namespace MoviesReservationSystem.Controllers
 
         // Lock Seat
         [HttpPost("lock")]
-        [EnableRateLimiting("booking")]
+        [EnableRateLimiting("seat-lock")]
         public async Task<IActionResult> LockSeatSelection([FromBody] SeatLockDTO seatLockDTO)
         {
             var result = await _seatLockService.LockSeats(seatLockDTO);
@@ -45,7 +45,7 @@ namespace MoviesReservationSystem.Controllers
 
         // Unlock seat
         [HttpDelete("unlock")]
-        [EnableRateLimiting("booking")]
+        [EnableRateLimiting("seat-lock")]
         public async Task<IActionResult> UnlockSeatSelection([FromBody] SeatLockDTO seatLockDTO)
         {
             await _seatLockService.UnlockSeats(seatLockDTO);
